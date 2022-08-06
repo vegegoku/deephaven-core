@@ -35,8 +35,6 @@ public class DeephavenJsApiLinker extends AbstractLinker {
 
         ArtifactSet toReturn = new ArtifactSet(artifacts);
         DefaultTextOutput out = new DefaultTextOutput(true);
-        out.print("(function(){");
-        out.newline();
 
         // get compilation result
         Set<CompilationResult> results = artifacts.find(CompilationResult.class);
@@ -54,9 +52,37 @@ public class DeephavenJsApiLinker extends AbstractLinker {
 
         // get the generated javascript
         String[] javaScript = result.getJavaScript();
-        out.print("self.dh = {}");
+        out.print("var descriptors = Object.getOwnPropertyDescriptors(self);");
         out.newline();
-        out.print("var $wnd = self, $doc, $entry, $moduleName, $moduleBase;");
+        out.print("for (var key in descriptors) {");
+        out.newline();
+        out.print("\tvar descriptor = descriptors[key];");
+        out.newline();
+        out.print("\tif (typeof (descriptor.value) === 'function') {");
+        out.newline();
+        out.print("\t\tdescriptor.value = descriptor.value.bind(self)");
+        out.newline();
+        out.print("\t} else if (typeof (descriptor.get) === 'function') {");
+        out.newline();
+        out.print("\t\tdescriptor.get = descriptor.get.bind(self);");
+        out.newline();
+        out.print("\t}");
+        out.newline();
+        out.print(" }");
+        out.newline();
+        out.print("var Scope = function () {};");
+        out.newline();
+        out.print("Scope.prototype = self;");
+        out.newline();
+        out.print("var $doc, $entry, $moduleName, $moduleBase;");
+        out.newline();
+        out.print("var $wnd = new Scope();");
+        out.newline();
+        out.print("Object.defineProperties($wnd, descriptors);");
+        out.newline();
+        out.print("var dh = {}");
+        out.newline();
+        out.print("$wnd.dh = dh;");
         out.newline();
         out.print("var $gwt_version = \"" + About.getGwtVersionNum() + "\";");
         out.newlineOpt();
@@ -65,7 +91,7 @@ public class DeephavenJsApiLinker extends AbstractLinker {
 
         out.print("gwtOnLoad(null,'" + context.getModuleName() + "',null);");
         out.newline();
-        out.print("})();");
+        out.print("export {dh};");
         out.newline();
 
         toReturn.add(emitString(logger, out.toString(), "dh-core.js"));
