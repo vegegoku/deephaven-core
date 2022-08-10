@@ -9,7 +9,9 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.linker.*;
 import com.google.gwt.dev.About;
 import com.google.gwt.dev.util.DefaultTextOutput;
+import com.google.gwt.util.tools.Utility;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -52,61 +54,38 @@ public class DeephavenJsApiLinker extends AbstractLinker {
 
         // get the generated javascript
         String[] javaScript = result.getJavaScript();
-        out.print("function bindTo(target, source){");
-        out.newline();
-        out.print("\tvar descriptors = Object.getOwnPropertyDescriptors(source);");
-        out.newline();
-        out.print("\tfor (var key in descriptors) {");
-        out.newline();
-        out.print("\t\tif(!(key[0].toUpperCase() === key[0])) {");
-        out.newline();
-        out.print("\t\tvar descriptor = descriptors[key];");
-        out.newline();
-        out.print("\t\tif (typeof (descriptor.value) === 'function') {");
-        out.newline();
-        out.print("\t\t\tdescriptor.value = descriptor.value.bind(source)");
-        out.newline();
-        out.print("\t\t} else if (typeof (descriptor.get) === 'function') {");
-        out.newline();
-        out.print("\t\t\tdescriptor.get = descriptor.get.bind(source);");
-        out.newline();
-        out.print("\t\t}");
-        out.print("\t\t}");
-        out.newline();
-        out.print("\t}");
-        out.newline();
-        out.print("Object.defineProperties(target, descriptors);");
-        out.newline();
-        out.print("}");
-        out.newline();
-        out.print("var Scope = function () {};");
-        out.newline();
-        out.print("Scope.prototype = self;");
-        out.newline();
-        out.print("var $doc, $entry, $moduleName, $moduleBase;");
-        out.newline();
-        out.print("var $wnd = new Scope();");
-        out.newline();
-        out.print("bindTo($wnd, self);");
-        out.newline();
-        out.newline();
-        out.print("var dh = {}");
-        out.newline();
-        out.print("$wnd.dh = dh;");
-        out.newline();
-        out.print("var $gwt_version = \"" + About.getGwtVersionNum() + "\";");
-        out.newlineOpt();
-        out.print(javaScript[0]);
-        out.newline();
 
-        out.print("gwtOnLoad(null,'" + context.getModuleName() + "',null);");
-        out.newline();
-        out.print("export {dh};");
-        out.newline();
+        StringBuffer buffer = readFileToStringBuffer(getSelectionScriptTemplate(), logger);
+        replaceAll(buffer, "__GWT_VERSION__",  About.getGwtVersionNum());
+        replaceAll(buffer, "__JAVASCRIPT_RESULT__",  javaScript[0]);
+        replaceAll(buffer, "__MODULE_NAME__",  context.getModuleName());
+
+        out.print(buffer.toString());
 
         toReturn.add(emitString(logger, out.toString(), "dh-core.js"));
 
         return toReturn;
     }
-
+    protected StringBuffer readFileToStringBuffer(String filename,
+                                                  TreeLogger logger) throws UnableToCompleteException {
+        StringBuffer buffer;
+        try {
+            buffer = new StringBuffer(Utility.getFileFromClassPath(filename));
+        } catch (IOException e) {
+            logger.log(TreeLogger.ERROR, "Unable to read file: " + filename, e);
+            throw new UnableToCompleteException();
+        }
+        return buffer;
+    }
+    protected String getSelectionScriptTemplate(){
+        return "io/deephaven/web/DeephavenJsApiLinkerTemplate.js";
+    }
+    protected static void replaceAll(StringBuffer buf, String search,
+                                     String replace) {
+        int len = search.length();
+        for (int pos = buf.indexOf(search); pos >= 0; pos = buf.indexOf(search,
+                pos + 1)) {
+            buf.replace(pos, pos + len, replace);
+        }
+    }
 }
