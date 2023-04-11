@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Javascript wrapper for {@link ColumnStatistics} This class holds the results of a call to generate statistics on a
- * table column.
+ * Holds the results of a call to generate statistics on a table column.
  */
 @TsInterface
 @TsName(name = "ColumnStatistics", namespace = "dh")

@@ -77,7 +77,6 @@ public class JsSeries {
     }
 
     /**
-     * JS doesn't support method overloads, so we just ignore this one and mark the arg as optional in the JS version.
      * Enable updates for this Series.
      */
     @JsIgnore

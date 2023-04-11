@@ -3,6 +3,8 @@
  */
 package io.deephaven.web.client.api;
 
+import com.vertispan.tsdefs.annotations.TsTypeDef;
+import com.vertispan.tsdefs.annotations.TsTypeRef;
 import io.deephaven.web.shared.data.CustomColumnDescriptor;
 import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsMethod;
@@ -12,10 +14,19 @@ import jsinterop.base.JsPropertyMap;
 
 @JsType(namespace = "dh")
 public class CustomColumn {
-    public static final String TYPE_FORMAT_COLOR = "FORMAT_COLOR",
-            TYPE_FORMAT_NUMBER = "FORMAT_NUMBER",
-            TYPE_FORMAT_DATE = "FORMAT_DATE",
-            TYPE_NEW = "NEW";
+    @JsType(namespace = "dh", name = "CustomColumnFormatType")
+    @TsTypeDef(tsType = "string")
+    public static class CustomColumnFormatType {
+        public static final String TYPE_FORMAT_COLOR = "FORMAT_COLOR",
+                TYPE_FORMAT_NUMBER = "FORMAT_NUMBER",
+                TYPE_FORMAT_DATE = "FORMAT_DATE",
+                TYPE_NEW = "NEW";
+    }
+
+    public static final String TYPE_FORMAT_COLOR = CustomColumnFormatType.TYPE_FORMAT_COLOR,
+            TYPE_FORMAT_NUMBER = CustomColumnFormatType.TYPE_FORMAT_NUMBER,
+            TYPE_FORMAT_DATE = CustomColumnFormatType.TYPE_FORMAT_DATE,
+            TYPE_NEW = CustomColumnFormatType.TYPE_NEW;
 
     // Copied from ColumnFormattingValues
     protected static final String ROW_FORMAT_NAME = "__ROW";
@@ -26,7 +37,7 @@ public class CustomColumn {
     /**
      * Get the suffix to append to the name for the provided type
      * 
-     * @param type The type of format, see TYPE_*
+     * @param type The type of format, see dh.CustomColumnFormatType
      * @return The suffix to append to the name for the provided type
      */
     private static String getNameSuffix(String type) {
@@ -98,8 +109,9 @@ public class CustomColumn {
     }
 
     /**
-     * @return Type of custom column. One of `FORMAT_COLOR`, `FORMAT_NUMBER`, `FORMAT_DATE`, or `NEW`.
+     * @return Type of custom column.
      */
+    @TsTypeRef(CustomColumnFormatType.class)
     @JsProperty
     public String getType() {
         return type;

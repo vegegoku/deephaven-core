@@ -76,9 +76,6 @@ import static io.deephaven.web.client.api.subscription.ViewportData.NO_ROW_FORMA
 import static io.deephaven.web.client.fu.LazyPromise.logError;
 
 /**
- * TODO provide hooks into the event handlers so we can see if no one is listening any more and release the table
- * handle/viewport.
- *
  * Provides access to data in a table. Note that several methods present their response through Promises. This allows
  * the client to both avoid actually connecting to the server until necessary, and also will permit some changes not to
  * inform the UI right away that they have taken place.
@@ -365,9 +362,9 @@ public class JsTable extends HasLifecycle implements HasTableBinding {
 
     /**
      * @param attributeName
-     * @return null if no property exists, a string if it is an easily serializable property, or a `Promise
-     *         <Table>
-     *         ` that will either resolve with a table or error out if the object can't be passed to JS.
+     * @return null if no property exists, a string if it is an easily serializable property, or a
+     *         {@code Promise<Table>} that will either resolve with a table or error out if the object can't be passed
+     *         to JS.
      */
     @JsMethod
     @JsNullable
@@ -1083,20 +1080,7 @@ public class JsTable extends HasLifecycle implements HasTableBinding {
     }
 
     /**
-     * @deprecated
-     * @return a promise that will be resolved with a newly created table holding the results of the join operation. The
-     *         last parameter is optional, and if not specified or empty, all columns from the right table will be added
-     *         to the output. Callers are responsible for ensuring that there are no duplicates - a match pair can be
-     *         passed instead of a name to specify the new name for the column. Supported `joinType` values (consult
-     *         Deephaven's "Joining Data from Multiple Tables for more detail): "Join" <a href=
-     *         'https://docs.deephaven.io/latest/Content/writeQueries/tableOperations/joins.htm#Joining_Data_from_Multiple_Tables'>Joining_Data_from_Multiple_Tables</a>
-     *         "Natural" "AJ" "ReverseAJ" "ExactJoin" "LeftJoin"
-     * @param joinType
-     * @param rightTable
-     * @param columnsToMatch
-     * @param columnsToAdd
-     * @param asOfMatchRule
-     * @return
+     * @deprecated Use one of the specific join methods.
      */
     @JsMethod
     @Deprecated
@@ -1116,15 +1100,24 @@ public class JsTable extends HasLifecycle implements HasTableBinding {
     }
 
     /**
-     * @param rightTable
-     * @param columnsToMatch
-     * @param columnsToAdd
-     * @param asOfMatchRule
+     * Asynchronously produces a new table, an as-of join from the current table to the specified `rightTable`.
+     *
+     * The `asOfMatchRule` is optional, defaults to "LESS_THAN_EQUAL". The allowed values are:
+     * <ul>
+     * <li>LESS_THAN_EQUAL</li>
+     * <li>LESS_THAN</li>
+     * <li>GREATER_THAN_EQUAL</li>
+     * <li>GREATER_THAN</li>
+     * </ul>
+     * 
+     * @param rightTable the table to join against this one
+     * @param columnsToMatch columns to compare between the left and right tables
+     * @param columnsToAdd columns to include in the result table from the right table. If omitted, all columns will be
+     *        included
+     * @param asOfMatchRule the rule to apply when comparing the columnsToMatch. Defaults to LESS_THAN_EQUAL if not
+     *        specified
      * @return a promise that will be resolved with the newly created table holding the results of the specified as-of
-     *         join operation. The `columnsToAdd` parameter is optional, not specifying it will result in all columns
-     *         from the right table being added to the output. The `asOfMatchRule` is optional, defaults to
-     *         "LESS_THAN_EQUAL" - the allowed values are: - "LESS_THAN_EQUAL" - "LESS_THAN" - "GREATER_THAN_EQUAL" -
-     *         "GREATER_THAN"
+     *         join operation
      */
     @JsMethod
     public Promise<JsTable> asOfJoin(JsTable rightTable, JsArray<String> columnsToMatch,

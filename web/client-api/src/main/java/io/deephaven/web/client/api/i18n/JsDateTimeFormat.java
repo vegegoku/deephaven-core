@@ -19,13 +19,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
- * Largely an exported wrapper for the GWT DateFormat, but also includes support for formatting nanoseconds as an
- * additional 6 decimal places after the rest of the number.
- *
- * Other concerns that this handles includes accepting a js Date and ignoring the lack of nanos, accepting a js Number
- * and assuming it to be a lossy nano value, and parsing into a js Date.
- *
- *
  * Utility class to parse and format various date/time values, using the same format patterns as are supported by the
  * standard Java implementation used in the Deephaven server and swing client.
  *
@@ -40,10 +33,11 @@ import java.util.*;
  *
  * Caveats:
  *
- *
- * - The `D` format (for "day of year") is not supported by this implementation at this time. - The `%t` format for
- * short timezone code is not supported by this implementation at this time, though `z` will work as expected in the
- * browser to emit the user's own timezone.
+ * <ul>
+ * <li>The `D` format (for "day of year") is not supported by this implementation at this time.</li>
+ * <li>The `%t` format for short timezone code is not supported by this implementation at this time, though `z` will
+ * work as expected in the browser to emit the user's own timezone.</li>
+ * </ul>
  *
  */
 @JsType(namespace = "dh.i18n", name = "DateTimeFormat")

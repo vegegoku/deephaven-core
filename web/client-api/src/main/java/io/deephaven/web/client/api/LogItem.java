@@ -10,16 +10,15 @@ import jsinterop.annotations.JsProperty;
 import java.io.Serializable;
 
 /**
- * Represents a serialized fishlib LogRecord, suitable for display on javascript clients. A log entry sent from the
- * server.
+ * A log entry sent from the server.
  */
 @TsInterface
 @TsName(namespace = "dh.ide")
 public class LogItem implements Serializable {
 
-    private double micros; // not using long, as js numbers are all floating point anyway
+    private double micros;
 
-    private String logLevel; // not an enum because fishlib LogLevel is a class that allows you to create your own
+    private String logLevel;
 
     private String message;
 
